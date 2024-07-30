@@ -1,1 +1,1 @@
-terminal = ''
+clear()
