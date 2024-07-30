@@ -24,12 +24,35 @@
       color: #ffaaee;
       font-family: "Fira Code";
       text-shadow: 0px 0px 75px #ffbbee, 0px 0px 25px #ffbbee, 0px 0px 200px #fff;
-      white-space: pre;
+      white-space: pre-wrap;
       overflow-wrap: break-word;
       user-select: text;
       padding: 10px;
       box-sizing: border-box;
       height: 100vh;
+      position: relative;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 11px;
+      height: 1.25em;
+      background-color: #ffaaee;
+      vertical-align: baseline;
+      animation: blink 1s step-end infinite;
+      position: absolute;
+    }
+
+    @keyframes blink {
+      50% {
+        background-color: transparent;
+        box-shadow: none;
+      }
+
+      0%,
+      100% {
+        box-shadow: 0px 0px 75px #ffbbee, 0px 0px 25px #ffbbee, 0px 0px 200px #fff;
+      }
     }
   </style>
 </head>
@@ -42,34 +65,83 @@
     let free = true;
     let cmdHistory = [];
     let pointer = 0;
-
+    let gettingInput = false;
+    let prompt = '> ';
     const username = 'c1ph3rC4t';
     const device = 'website';
     const cmds = [];
     const startTime = new Date().getTime();
 
-    const getUptime = () => {
-      const currentTime = new Date().getTime();
-      return (currentTime - startTime) / 1000;
-    };
+    const updateDisplay = () => {
+      const glowText = document.getElementById('glow-text');
+      let userText = terminal;
 
-    const formatTime = (seconds) => {
-      const units = [
-        { name: 'days', value: 86400 },
-        { name: 'hours', value: 3600 },
-        { name: 'minutes', value: 60 },
-        { name: 'seconds', value: 1 }
-      ];
-
-      for (let unit of units) {
-        if (seconds >= unit.value) {
-          const count = Math.round(seconds / unit.value);
-          return `${count} ${unit.name}`;
-        }
+      if (gettingInput) {
+        userText += `${prompt}${inputString}`;
+      } else {
+        userText += `${username}@${device}:~$ ${inputString}`;
       }
 
-      return '0 seconds';
+      glowText.innerHTML = userText;
+
+      const existingCursor = document.querySelector('.cursor');
+      if (existingCursor) {
+        existingCursor.remove();
+      }
+
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      glowText.appendChild(cursor);
+
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      context.font = '15px "Fira Code"';
+
+      const getTextWidth = (text) => context.measureText(text).width;
+
+      const lineHeight = parseFloat(window.getComputedStyle(glowText).lineHeight);
+
+      const lines = userText.split('\n');
+      const lastLine = lines[lines.length - 1];
+      const lastLineWidth = getTextWidth(lastLine);
+      const lastLineHeight = lineHeight * (lines.length - 1);
+
+      cursor.style.left = `${lastLineWidth + 11}px`;
+      cursor.style.top = `${lastLineHeight}px`;
+
+      glowText.scrollTop = glowText.scrollHeight;
     };
+
+
+    const getInput = (prmpt) => {
+      prompt = prmpt;
+      return new Promise((resolve) => {
+        const inputHandler = (event) => {
+          if (event.key === 'Enter') {
+            document.removeEventListener('keydown', inputHandler);
+            print(`${prompt}${inputString}`);
+            gettingInput = false;
+            resolve(inputString);
+            inputString = '';
+            updateDisplay();
+          } else if (event.key.length === 1) {
+            inputString += event.key;
+            updateDisplay();
+          } else if (event.key === 'Backspace') {
+            inputString = inputString.slice(0, -1);
+            updateDisplay();
+          }
+        };
+
+        document.addEventListener('keydown', inputHandler);
+        gettingInput = true;
+        updateDisplay();
+      });
+    };
+
+    const clear = () => {
+      terminal = '';
+    }
 
     const fetchCmds = async () => {
       try {
@@ -106,107 +178,114 @@
 
     const parseCmd = (cmd) => {
       const parts = cmd.split(' ');
-      const result = {cmd: parts[0], args: {}};
-      let currentFlag = '';
+      const result = {cmd: parts[0], args: {}, flags: []};
 
-      for (let i = 1; i < parts.length; i++) {
-        if (parts[i].startsWith('--')) {
-          currentFlag = parts[i].substring(2);
-          result.args[currentFlag] = '';
-        } else if (parts[i].startsWith('-')) {
-          currentFlag = parts[i].substring(1);
-          result.args[currentFlag] = '';
-        } else if (currentFlag) {
-          result.args[currentFlag] = parts[i];
-          currentFlag = '';
-        } else {
-          if (!result.args['']) {
-            result.args[''] = parts[i];
+      const getFlags = () => {
+        let arg;
+
+        const processArg = (i) => {
+          if (i < parts.length && parts[i].slice(0, 1) !== '-') {
+            return ' ' + parts[i] + processArg(i + 1);
           } else {
-            result.args[''] += ' ' + parts[i];
+            return '';
+          }
+        }
+
+        for (let i = 1; i < parts.length; i++) {
+          if (parts[i].slice(0, 2) === '--') {
+            result.flags.push(parts[i].slice(2));
+            arg = processArg(i + 1).slice(1);
+            if (arg !== '') {
+              result.args[parts[i].slice(2)] = arg;
+            }
+          } else {
+            if (parts[i].slice(0, 1) === '-') {
+              result.flags.push(parts[i][1]);
+              if (parts[i].length > 2) {
+                result.args[parts[i][1]] = parts[i].slice(2) + processArg(i + 1);
+              } else {
+                arg = processArg(i + 1).slice(1);
+                if (arg !== '') {
+                  result.args[parts[i][1]] = arg;
+                }
+              }
+            }
           }
         }
       }
 
+      getFlags();
+
       return result;
     };
 
-    const run = (cmd) => {
-      cmdHistory.push(cmd)
+    const run = async (cmd) => {
+      cmdHistory.push(cmd);
       cmd = parseCmd(cmd);
       if (cmds.includes(cmd.cmd)) {
         eval(readFileSync(`./cmds/${cmd.cmd}.js`));
       } else {
         print(`Error cmd '${cmd.cmd}' not found.`);
       }
+      updateDisplay();
     };
 
     const print = (text) => {
       terminal += `${text}\n`;
+      updateDisplay();
     };
 
-    document.addEventListener('keydown', (event) => {
-      if (free) {
-        if (event.key === 'Backspace') {
-          inputString = inputString.slice(0, -1);
-        } else if (event.key === 'Enter') {
+    document.addEventListener('keydown', async (event) => {
+      if (free && !gettingInput) {
+        if (event.key === 'Enter') {
+          print(`${username}@${device}:~$ ${inputString}`);
           try {
-            print(`${username}@${device}:~$ ${inputString}`);
-            run(inputString);
-            pointer = 0;
-            inputString = '';
-          } catch(err) {
+            await run(inputString);
+          } catch (err) {
             print(`Error '${err}' in '${inputString}'`);
-            pointer = 0;
-            inputString = '';
           }
+          pointer = 0;
+          inputString = '';
+          updateDisplay();
         } else if (event.key.length === 1) {
           inputString += event.key;
-        } else if (event.key === 'ArrowUp' && cmdHistory.length != 0) {
+          updateDisplay();
+        } else if (event.key === 'Backspace') {
+          inputString = inputString.slice(0, -1);
+          updateDisplay();
+        } else if (event.key === 'ArrowUp' && cmdHistory.length !== 0) {
           pointer += 1;
           if (pointer >= cmdHistory.length + 1) {
             pointer = cmdHistory.length;
           }
           inputString = cmdHistory[cmdHistory.length - pointer];
-        } else if (event.key === 'ArrowDown' && cmdHistory.length != 0) {
+          updateDisplay();
+        } else if (event.key === 'ArrowDown' && cmdHistory.length !== 0) {
           pointer -= 1;
           if (pointer <= 0) {
             pointer = 1;
           }
           inputString = cmdHistory[cmdHistory.length - pointer];
+          updateDisplay();
         }
         if (event.key === 'ArrowDown' && pointer === 1) {
           pointer = 0;
           inputString = '';
+          updateDisplay();
         }
       }
     });
 
-    const getInputString = () => {
-      return inputString;
-    };
-
-    const update = () => {
-      const userInput = getInputString();
-      let userText
-
-      if (getUptime() % 1 <= 0.5) {
-        userText = `${username}@${device}:~$ ${userInput}█\n`;
-      } else {
-        userText = `${username}@${device}:~$ ${userInput}\n`;
-      }
-
+    document.addEventListener('paste', (event) => {
       if (free) {
-        document.getElementById('glow-text').textContent = terminal + userText;
-      } else {
-        inputString = '';
-        document.getElementById('glow-text').textContent = terminal;
+        const paste = (event.clipboardData || window.clipboardData).getData('text');
+        inputString = inputString.slice(0, -1) + paste.replaceAll('\n', '');
+        event.preventDefault();
+        updateDisplay();
       }
+    });
 
-      setTimeout(() => requestAnimationFrame(update), 100);
-    };
-
-    update();
+    updateDisplay();
   </script>
 </body>
 
