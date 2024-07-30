@@ -10,8 +10,8 @@
     body {
       background-color: black;
       font-family: "Fira Code", Courier, monospace;
-      letter-spacing: normal;
-      word-spacing: normal;
+      margin: 0;
+      padding: 0;
     }
 
     .glow {
@@ -20,6 +20,11 @@
       font-family: "Fira Code";
       text-shadow: 0px 0px 75px #ffbbee, 0px 0px 25px #ffbbee, 0px 0px 200px #fff;
       white-space: pre;
+      overflow-wrap: break-word;
+      user-select: text;
+      padding: 10px;
+      box-sizing: border-box;
+      height: 100vh;
     }
   </style>
 </head>
@@ -33,85 +38,85 @@
     const device = 'website';
     let free = true;
     const cmds = [];
+    const startTime = new Date().getTime();
 
-      // Fetch command list from GitHub API
-      const fetchCmds = async () => {
-        try {
-          const response = await fetch('https://api.github.com/repos/c1ph3rC4t/c1ph3rc4t.github.io/contents/cmds');
-          if (response.ok) {
-            const files = await response.json();
-            files.forEach(file => {
-              if (file.type === 'file' && file.name.endsWith('.js')) {
-                cmds.push(file.name.replace('.js', ''));
-              }
-            });
-            console.log('Fetched cmds:', cmds);
-          } else {
-            console.error('Failed to fetch command list:', response.status, response.statusText);
-          }
-        } catch (error) {
-          console.error('Fetch error:', error);
+    const getUptime = () => {
+      const currentTime = new Date().getTime();
+      return Math.floor((currentTime - startTime) / 1000);
+    };
+
+    const fetchCmds = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/c1ph3rC4t/c1ph3rc4t.github.io/contents/cmds');
+        if (response.ok) {
+          const files = await response.json();
+          files.forEach(file => {
+            if (file.type === 'file' && file.name.endsWith('.js')) {
+              cmds.push(file.name.replace('.js', ''));
+            }
+          });
         }
-      };
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    };
 
-      fetchCmds();
+    fetchCmds();
 
     const readFileSync = (filePath) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', filePath, false);
-        try {
-            xhr.send();
-            if (xhr.status === 200) {
-                return xhr.responseText;
-            } else {
-                console.error('Error fetching file:', xhr.statusText);
-                return null;
-            }
-        } catch (error) {
-            console.error('Request failed:', error);
-            return null;
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', filePath, false);
+      try {
+        xhr.send();
+        if (xhr.status === 200) {
+          return xhr.responseText;
+        } else {
+          return null;
         }
+      } catch (error) {
+        return null;
+      }
     };
 
     const parseCmd = (cmd) => {
-        const parts = cmd.split(' ');
-        const result = { cmd: parts[0], args: {} };
-        let currentFlag = '';
+      const parts = cmd.split(' ');
+      const result = {cmd: parts[0], args: {}};
+      let currentFlag = '';
 
-        for (let i = 1; i < parts.length; i++) {
-            if (parts[i].startsWith('--')) {
-                currentFlag = parts[i].substring(2);
-                result.args[currentFlag] = '';
-            } else if (parts[i].startsWith('-')) {
-                currentFlag = parts[i].substring(1);
-                result.args[currentFlag] = '';
-            } else if (currentFlag) {
-                result.args[currentFlag] = parts[i];
-                currentFlag = '';
-            } else {
-                if (!result.args['']) {
-                    result.args[''] = parts[i];
-                } else {
-                    result.args[''] += ' ' + parts[i];
-                }
-            }
+      for (let i = 1; i < parts.length; i++) {
+        if (parts[i].startsWith('--')) {
+          currentFlag = parts[i].substring(2);
+          result.args[currentFlag] = '';
+        } else if (parts[i].startsWith('-')) {
+          currentFlag = parts[i].substring(1);
+          result.args[currentFlag] = '';
+        } else if (currentFlag) {
+          result.args[currentFlag] = parts[i];
+          currentFlag = '';
+        } else {
+          if (!result.args['']) {
+            result.args[''] = parts[i];
+          } else {
+            result.args[''] += ' ' + parts[i];
+          }
         }
+      }
 
-        return result;
+      return result;
     };
 
     const run = (cmd) => {
-      cmd = parseCmd(cmd)
+      cmd = parseCmd(cmd);
       if (cmds.includes(cmd.cmd)) {
-        eval(readFileSync(`./cmds/${cmd.cmd}.js`))
+        eval(readFileSync(`./cmds/${cmd.cmd}.js`));
       } else {
-        print(`Error cmd '${cmd.cmd}' not found.`)
+        print(`Error cmd '${cmd.cmd}' not found.`);
       }
-    }
+    };
 
     const print = (text) => {
-      terminal += `${text}\n`
-    }
+      terminal += `${text}\n`;
+    };
 
     document.addEventListener('keydown', (event) => {
       if (free) {
@@ -123,29 +128,33 @@
           inputString = '';
         } else if (event.key.length === 1) {
           inputString += event.key;
-        } else {
-          console.log('WTF is:', event.key);
         }
       }
     });
 
     const getInputString = () => {
       return inputString;
-    }
+    };
 
     const update = () => {
       const userInput = getInputString();
-      const userText = `${username}@${device}:~$ ${userInput}\n`;
+      let userText
+
+      if (getUptime() % 2 >= 1) {
+        userText = `${username}@${device}:~$ ${userInput}█\n`;
+      } else {
+        userText = `${username}@${device}:~$ ${userInput}\n`;
+      }
 
       if (free) {
         document.getElementById('glow-text').textContent = terminal + userText;
       } else {
-        inputString = ''
+        inputString = '';
         document.getElementById('glow-text').textContent = terminal;
       }
 
-      requestAnimationFrame(update);
-    }
+      setTimeout(() => requestAnimationFrame(update), 100);
+    };
 
     update();
   </script>
