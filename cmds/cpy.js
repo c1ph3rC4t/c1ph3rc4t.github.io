@@ -1,5 +1,5 @@
 try {
-  navigator.clipboard.writeText(cmdList[cmd.args.l])
+  navigator.clipboard.writeText(cmdHistory[cmd.args.l])
 } catch(err) {
-  navigator.clipboard.writeText(cmdList[cmdList.length - 1])
+  navigator.clipboard.writeText(cmdHistory[cmdHistory.length - 1])
 }
