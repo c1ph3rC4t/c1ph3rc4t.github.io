@@ -72,6 +72,29 @@
     const cmds = [];
     const startTime = new Date().getTime();
 
+    const getUptime = () => {
+      const currentTime = new Date().getTime();
+      return (currentTime - startTime) / 1000;
+    };
+
+    const formatTime = (seconds) => {
+      const units = [
+        {name: 'days', value: 86400},
+        {name: 'hours', value: 3600},
+        {name: 'minutes', value: 60},
+        {name: 'seconds', value: 1}
+      ];
+
+      for (let unit of units) {
+        if (seconds >= unit.value) {
+          const count = Math.round(seconds / unit.value);
+          return `${count} ${unit.name}`;
+        }
+      }
+
+      return '0 seconds';
+    };
+
     const updateDisplay = () => {
       const glowText = document.getElementById('glow-text');
       let userText = terminal;
