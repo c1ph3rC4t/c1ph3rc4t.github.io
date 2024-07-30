@@ -45,6 +45,24 @@
       return Math.floor((currentTime - startTime) / 1000);
     };
 
+    const formatTime = (seconds) => {
+  const units = [
+    { name: 'days', value: 86400 },
+    { name: 'hours', value: 3600 },
+    { name: 'minutes', value: 60 },
+    { name: 'seconds', value: 1 }
+  ];
+
+  for (let unit of units) {
+    if (seconds >= unit.value) {
+      const count = Math.round(seconds / unit.value);
+      return `${count} ${unit.name}`;
+    }
+  }
+
+  return '0 seconds';
+};
+
     const fetchCmds = async () => {
       try {
         const response = await fetch('https://api.github.com/repos/c1ph3rC4t/c1ph3rc4t.github.io/contents/cmds');
