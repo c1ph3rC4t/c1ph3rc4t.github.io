@@ -14,6 +14,11 @@
       padding: 0;
     }
 
+    pre {
+      margin: 0;
+      padding: 0;
+    }
+
     .glow {
       font-size: 15px;
       color: #ffaaee;
@@ -34,34 +39,19 @@
   <script>
     let inputString = '';
     let terminal = '';
+    let free = true;
+    let cmdHistory = [];
+    let pointer = 0;
+
     const username = 'c1ph3rC4t';
     const device = 'website';
-    let free = true;
     const cmds = [];
     const startTime = new Date().getTime();
 
     const getUptime = () => {
       const currentTime = new Date().getTime();
-      return Math.floor((currentTime - startTime) / 1000);
+      return (currentTime - startTime) / 1000;
     };
-
-    const formatTime = (seconds) => {
-  const units = [
-    { name: 'days', value: 86400 },
-    { name: 'hours', value: 3600 },
-    { name: 'minutes', value: 60 },
-    { name: 'seconds', value: 1 }
-  ];
-
-  for (let unit of units) {
-    if (seconds >= unit.value) {
-      const count = Math.round(seconds / unit.value);
-      return `${count} ${unit.name}`;
-    }
-  }
-
-  return '0 seconds';
-};
 
     const fetchCmds = async () => {
       try {
@@ -124,6 +114,7 @@
     };
 
     const run = (cmd) => {
+      cmdHistory.push(cmd)
       cmd = parseCmd(cmd);
       if (cmds.includes(cmd.cmd)) {
         eval(readFileSync(`./cmds/${cmd.cmd}.js`));
@@ -136,10 +127,6 @@
       terminal += `${text}\n`;
     };
 
-    const clear = () => {
-      terminal = '';
-    };
-
     document.addEventListener('keydown', (event) => {
       if (free) {
         if (event.key === 'Backspace') {
@@ -147,9 +134,26 @@
         } else if (event.key === 'Enter') {
           print(`${username}@${device}:~$ ${inputString}`);
           run(inputString);
+          pointer = 0
           inputString = '';
         } else if (event.key.length === 1) {
           inputString += event.key;
+        } else if (event.key === 'ArrowUp' && cmdHistory.length != 0) {
+          pointer += 1;
+          if (pointer >= cmdHistory.length + 1) {
+            pointer = cmdHistory.length;
+          }
+          inputString = cmdHistory[cmdHistory.length - pointer];
+        } else if (event.key === 'ArrowDown' && cmdHistory.length != 0) {
+          pointer -= 1;
+          if (pointer <= 0) {
+            pointer = 1;
+          }
+          inputString = cmdHistory[cmdHistory.length - pointer];
+        }
+        if (event.key === 'ArrowDown' && pointer === 1) {
+          pointer = 0;
+          inputString = '';
         }
       }
     });
@@ -162,7 +166,7 @@
       const userInput = getInputString();
       let userText
 
-      if (getUptime() % 2 >= 1) {
+      if (getUptime() % 1 <= 0.5) {
         userText = `${username}@${device}:~$ ${userInput}█\n`;
       } else {
         userText = `${username}@${device}:~$ ${userInput}\n`;
