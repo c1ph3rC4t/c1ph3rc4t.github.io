@@ -27,30 +27,127 @@
 <body>
   <pre class="glow" id="glow-text"></pre>
   <script>
-    const text = `c@CsComputer:~$ uwufetch
-⣇⣿⠘⣿⣿⣿⡿⡿⣟⣟⢟⢟⢝⠵⡝⣿⡿⢂⣼⣿⣷⣌⠩⡫⡻⣝⠹⢿⣿⣷ c@CsComputer
-⡆⣿⣆⠱⣝⡵⣝⢅⠙⣿⢕⢕⢕⢕⢝⣥⢒⠅⣿⣿⣿⡿⣳⣌⠪⡪⣡⢑⢝⣇ ------------
-⡆⣿⣿⣦⠹⣳⣳⣕⢅⠈⢗⢕⢕⢕⢕⢕⢈⢆⠟⠋⠉⠁⠉⠉⠁⠈⠼⢐⢕⢽ OS: UWU Linux
-⡗⢰⣶⣶⣦⣝⢝⢕⢕⠅⡆⢕⢕⢕⢕⢕⣴⠏⣠⡶⠛⡉⡉⡛⢶⣦⡀⠐⣕⢕ Kernel: 6.8.11-amd64
-⡝⡄⢻⢟⣿⣿⣷⣕⣕⣅⣿⣔⣕⣵⣵⣿⣿⢠⣿⢠⣮⡈⣌⠨⠅⠹⣷⡀⢱⢕ Uptime: 1 day
-⡝⡵⠟⠈⢀⣀⣀⡀⠉⢿⣿⣿⣿⣿⣿⣿⣿⣼⣿⢈⡋⠴⢿⡟⣡⡇⣿⡇⡀⢕ Packages: 9827 (dpkg)
-⡝⠁⣠⣾⠟⡉⡉⡉⠻⣦⣻⣿⣿⣿⣿⣿⣿⣿⣿⣧⠸⣿⣦⣥⣿⡇⡿⣰⢗⢄ Shell: zsh 5.9
-⠁⢰⣿⡏⣴⣌⠈⣌⠡⠈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣬⣉⣉⣁⣄⢖⢕⢕⢕ Resolution: 3840x2160
-⡀⢻⣿⡇⢙⠁⠴⢿⡟⣡⡆⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣵⣵⣿ DE: Xfce 4.18
-⡻⣄⣻⣿⣌⠘⢿⣷⣥⣿⠇⣿⣿⣿⣿⣿⣿⠛⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ WM: Xfwm4
-⣷⢄⠻⣿⣟⠿⠦⠍⠉⣡⣾⣿⣿⣿⣿⣿⣿⢸⣿⣦⠙⣿⣿⣿⣿⣿⣿⣿⣿⠟ WM Theme: UWU-dark
-⡕⡑⣑⣈⣻⢗⢟⢞⢝⣻⣿⣿⣿⣿⣿⣿⣿⠸⣿⠿⠃⣿⣿⣿⣿⣿⣿⡿⠁⣠ Theme: UWU-dark
-⡝⡵⡈⢟⢕⢕⢕⢕⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣶⣿⣿⣿⣿⣿⠿⠋⣀⣈⠙ Terminal: UWUminal
-⡝⡵⡕⡀⠑⠳⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⢉⡠⡲⡫⡪⡪⡣ Terminal Font: FiraCode 10
-⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄ CPU: C1ph3r® Corp. standard issued CPUs
-⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄ GPU: C1ph3r® Corp. standard issued GPUs
-⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄ NPU: C1ph3r® Corp. standard issued NPUs
-⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄ Storage: 837PiB / 1EiB
-⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄ Memory: 178PiB / 256PiB
-`;
+    let inputString = '';
+    let terminal = '';
+    const username = 'c1ph3rC4t';
+    const device = 'website';
+    let free = true;
+    const cmds = [];
 
-    document.getElementById('glow-text').textContent = text;
+      // Fetch command list from GitHub API
+      const fetchCmds = async () => {
+        try {
+          const response = await fetch('https://api.github.com/repos/c1ph3rC4t/c1ph3rc4t.github.io/contents/cmds');
+          if (response.ok) {
+            const files = await response.json();
+            files.forEach(file => {
+              if (file.type === 'file' && file.name.endsWith('.js')) {
+                cmds.push(file.name.replace('.js', ''));
+              }
+            });
+            console.log('Fetched cmds:', cmds);
+          } else {
+            console.error('Failed to fetch command list:', response.status, response.statusText);
+          }
+        } catch (error) {
+          console.error('Fetch error:', error);
+        }
+      };
 
+      fetchCmds();
+
+    const readFileSync = (filePath) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', filePath, false);
+        try {
+            xhr.send();
+            if (xhr.status === 200) {
+                return xhr.responseText;
+            } else {
+                console.error('Error fetching file:', xhr.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Request failed:', error);
+            return null;
+        }
+    };
+
+    const parseCmd = (cmd) => {
+        const parts = cmd.split(' ');
+        const result = { cmd: parts[0], args: {} };
+        let currentFlag = '';
+
+        for (let i = 1; i < parts.length; i++) {
+            if (parts[i].startsWith('--')) {
+                currentFlag = parts[i].substring(2);
+                result.args[currentFlag] = '';
+            } else if (parts[i].startsWith('-')) {
+                currentFlag = parts[i].substring(1);
+                result.args[currentFlag] = '';
+            } else if (currentFlag) {
+                result.args[currentFlag] = parts[i];
+                currentFlag = '';
+            } else {
+                if (!result.args['']) {
+                    result.args[''] = parts[i];
+                } else {
+                    result.args[''] += ' ' + parts[i];
+                }
+            }
+        }
+
+        return result;
+    };
+
+    const run = (cmd) => {
+      cmd = parseCmd(cmd)
+      if (cmds.includes(cmd.cmd)) {
+        eval(readFileSync(`./cmds/${cmd.cmd}.js`))
+      } else {
+        print(`Error cmd '${cmd.cmd}' not found.`)
+      }
+    }
+
+    const print = (text) => {
+      terminal += `${text}\n`
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (free) {
+        if (event.key === 'Backspace') {
+          inputString = inputString.slice(0, -1);
+        } else if (event.key === 'Enter') {
+          print(`${username}@${device}:~$ ${inputString}`);
+          run(inputString);
+          inputString = '';
+        } else if (event.key.length === 1) {
+          inputString += event.key;
+        } else {
+          console.log('WTF is:', event.key);
+        }
+      }
+    });
+
+    const getInputString = () => {
+      return inputString;
+    }
+
+    const update = () => {
+      const userInput = getInputString();
+      const userText = `${username}@${device}:~$ ${userInput}\n`;
+
+      if (free) {
+        document.getElementById('glow-text').textContent = terminal + userText;
+      } else {
+        inputString = ''
+        document.getElementById('glow-text').textContent = terminal;
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    update();
   </script>
 </body>
 
