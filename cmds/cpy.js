@@ -1,5 +1,5 @@
 if (cmd.flags.includes('p')) {
-  getInput('Input: ').then((input) => {
+  getInput('Copy index: ').then((input) => {
     navigator.clipboard.writeText(cmdHistory[cmdHistory.length - 1 - input]);
     console.log(input);
   });
