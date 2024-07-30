@@ -136,6 +136,10 @@
       terminal += `${text}\n`;
     };
 
+    const clear = () => {
+      terminal = '';
+    };
+
     document.addEventListener('keydown', (event) => {
       if (free) {
         if (event.key === 'Backspace') {
