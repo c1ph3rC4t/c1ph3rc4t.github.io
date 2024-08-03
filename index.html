@@ -84,6 +84,10 @@
         });
     };
 
+    const redir = (url) => {
+      window.location.href = url;
+    };
+
     const getUptime = () => {
       const currentTime = new Date().getTime();
       return (currentTime - startTime) / 1000;
@@ -261,7 +265,15 @@
         eval(readFileSync(`./cmds/${cmd.cmd}.js`));
       } else {
         print(`Error cmd '${cmd.cmd}' not found.`);
-      }
+      };
+      updateDisplay();
+    };
+
+    const runNoLog = async (cmd) => {
+      cmd = parseCmd(cmd);
+      if (cmds.includes(cmd.cmd)) {
+        eval(readFileSync(`./cmds/${cmd.cmd}.js`));
+      };
       updateDisplay();
     };
 
