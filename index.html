@@ -73,10 +73,6 @@
     const startTime = new Date().getTime();
     const version = '1.1.0'
 
-    const hasFlag = (flag) => {
-      return cmd.flags.includes(flag);
-    };
-
     const uwuGrab = () => {
       return fetch('https://UwU-IP-grabber.glitch.me/info')
         .then(response => response.json())
@@ -263,6 +259,9 @@
     };
 
     const run = async (cmd) => {
+        const hasFlag = (flag) => {
+        return cmd.flags.includes(flag);
+      };
       cmdHistory.push(cmd);
       cmd = parseCmd(cmd);
       if (cmds.includes(cmd.cmd)) {
@@ -274,6 +273,9 @@
     };
 
     const runNoLog = async (cmd) => {
+      const hasFlag = (flag) => {
+        return cmd.flags.includes(flag);
+      };
       cmd = parseCmd(cmd);
       if (cmds.includes(cmd.cmd)) {
         eval(readFileSync(`./cmds/${cmd.cmd}.js`));
